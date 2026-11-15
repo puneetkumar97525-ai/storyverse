@@ -22,7 +22,7 @@ one starts. Only Phase 1 is implemented today.
 | Health checks (frontend + backend) | `/api/v1/health*`, status panel | ✅ |
 | Initial tests | 30 Pytest + 15 Vitest | ✅ |
 | Documentation | `README.md`, `docs/` | ✅ |
-| CI pipeline | `.github/workflows/ci.yml` | ✅ (not yet executed on GitHub) |
+| CI pipeline | `.github/workflows/ci.yml` | ✅ (green on GitHub Actions) |
 
 **Definition of done:** both servers start from a clean clone, the UI shows live API and database
 status, all tests pass, lint is clean, and every configuration file is documented.

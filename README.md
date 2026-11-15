@@ -3,6 +3,8 @@
 An interactive, AI-assisted storytelling platform for branching stories, voice narration,
 multilingual content, creative studios and learning progress.
 
+[![CI](https://github.com/puneetkumar97525-ai/storyverse/actions/workflows/ci.yml/badge.svg)](https://github.com/puneetkumar97525-ai/storyverse/actions/workflows/ci.yml)
+
 **Status: Phase 1 (project foundation) complete.** The repository currently contains a working
 React + TypeScript frontend, a FastAPI backend, a PostgreSQL development setup, health checks,
 tests and documentation. AI storytelling, authentication and the interactive features are
@@ -175,6 +177,8 @@ npm run test:watch                       # Vitest (watch mode)
 npm run build                            # production build
 ```
 
+GitHub Actions runs the same lint/test/build commands on every pull request (see `.github/workflows/ci.yml`).
+
 Last verified results (Python 3.11.2, Node 22.22.3):
 
 ```
@@ -314,7 +318,6 @@ storyverse/
   outside Docker; the `docker-compose.yml` service itself has not been executed here (Docker is
   unavailable in the sandbox). It is validated as YAML only — run `docker compose up` once to
   confirm on your machine.
-- **No CI run yet.** The workflow is committed but has not executed on GitHub.
 - **No models or migrations.** `models/` and `migrations/versions/` are empty; the first migration
   arrives with the first table (Phase 2).
 - **No routing on the frontend.** One page is enough for Phase 1; a router is postponed rather than
