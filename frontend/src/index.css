@@ -1,0 +1,34 @@
+/*
+ * Tailwind CSS v4 entry point.
+ *
+ * v4 is configured in CSS instead of a tailwind.config.js file:
+ * `@import "tailwindcss"` loads the framework, `@theme` defines design tokens,
+ * and `@layer base` styles the HTML elements.
+ */
+@import 'tailwindcss';
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased;
+    background-image:
+      radial-gradient(55rem 35rem at 10% -10%, rgb(99 102 241 / 0.18), transparent 60%),
+      radial-gradient(45rem 35rem at 100% 0%, rgb(192 132 252 / 0.12), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-indigo-400/30 text-white;
+  }
+}

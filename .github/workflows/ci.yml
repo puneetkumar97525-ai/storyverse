@@ -1,0 +1,76 @@
+name: CI
+
+# Runs the same checks a developer runs locally:
+# lint + tests for the backend (Pytest) and the frontend (Vitest), plus a
+# production build of the UI. No PostgreSQL service is required because the
+# backend tests stub every database call.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (lint + Pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Test (pytest)
+        env:
+          ENVIRONMENT: test
+          POSTGRES_PASSWORD: ci-test-password
+        run: pytest --cov=app --cov-report=term-missing
+
+  frontend:
+    name: Frontend (lint + typecheck + Vitest + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Typecheck (tsc)
+        run: npm run typecheck
+
+      - name: Test (Vitest)
+        run: npm run test
+
+      - name: Build
+        run: npm run build

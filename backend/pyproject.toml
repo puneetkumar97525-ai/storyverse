@@ -1,0 +1,54 @@
+# Tooling configuration for the StoryVerse backend.
+#
+# Dependencies are intentionally NOT listed here - they live in
+# requirements.txt / requirements-dev.txt so a beginner can run a single
+# `pip install -r requirements-dev.txt`. This file configures ruff (linting)
+# and pytest only.
+
+[project]
+name = "storyverse-api"
+version = "0.1.0"
+description = "FastAPI backend for StoryVerse, an interactive storytelling platform"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # import sorting
+  "UP",  # pyupgrade (modern syntax)
+  "B",   # flake8-bugbear (likely bugs)
+  "C4",  # flake8-comprehensions
+  "SIM", # flake8-simplify
+  "RUF", # ruff-specific rules
+]
+ignore = [
+  "B008", # FastAPI uses function calls (Depends/Query) in default arguments by design
+]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*" = ["E501"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+# Makes `import app...` work when running pytest from the backend/ directory.
+pythonpath = ["."]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = ["error::DeprecationWarning:app.*"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/main.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+]
