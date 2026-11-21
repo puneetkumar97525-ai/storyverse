@@ -1,0 +1,91 @@
+# Docker Compose for local development: PostgreSQL + FastAPI + Vite.
+#
+# First run:
+#   cp .env.example .env                    # set your own POSTGRES_PASSWORD
+#   cp backend/.env.example backend/.env    # same password as above
+#   docker compose up --build
+#
+# Then open http://localhost:5173 (UI) and http://localhost:8000/docs (API).
+#
+# This file is for development only. Production would use managed secrets,
+# no bind mounts, no --reload, and a built static frontend behind a proxy.
+
+name: storyverse
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: storyverse-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-storyverse}
+      # ":?" makes compose fail fast if .env is missing the password.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
+      POSTGRES_DB: ${POSTGRES_DB:-storyverse}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      # Named volume: data survives `docker compose down`, and is removed by
+      # `docker compose down -v`.
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+    container_name: storyverse-backend
+    restart: unless-stopped
+    # Application settings (never committed).
+    env_file:
+      - ./backend/.env
+    environment:
+      # Inside the compose network the database is reachable as "db:5432",
+      # which overrides the localhost values in backend/.env.
+      POSTGRES_HOST: db
+      POSTGRES_PORT: '5432'
+    ports:
+      - '${BACKEND_PORT:-8000}:8000'
+    volumes:
+      # Bind mount: code changes are picked up by uvicorn --reload.
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # python is guaranteed in the image; curl is not installed.
+      test:
+        [
+          'CMD-SHELL',
+          "python -c \"import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').status == 200 else 1)\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: storyverse-frontend
+    restart: unless-stopped
+    environment:
+      # Relative API base -> the dev server proxies it to the backend service.
+      VITE_API_BASE_URL: /api/v1
+      VITE_DEV_PROXY_TARGET: http://backend:8000
+    ports:
+      - '${FRONTEND_PORT:-5173}:5173'
+    volumes:
+      - ./frontend:/app
+      # Keep the image's node_modules instead of the host's (if any).
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    name: storyverse_postgres_data

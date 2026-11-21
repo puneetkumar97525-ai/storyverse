@@ -1,0 +1,4 @@
+# Migration revisions live here. Phase 1 defines no tables yet.
+#
+# The first real migration will be created once models exist, e.g.
+#   alembic revision --autogenerate -m "create users table"
